@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>野球選手 好きな顔9選メーカー（本選厳選・タイマン最適化版）</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #fff5f5; color: #333; }
+        h1 { color: #e53e3e; text-align: center; font-size: 1.4rem; margin-bottom: 5px; }
+        .subtitle { text-align: center; font-size: 0.85rem; color: #718096; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        textarea { width: 100%; height: 150px; padding: 10px; box-sizing: border-box; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; font-family: monospace; }
+        button { background: #e53e3e; color: white; border: none; padding: 14px 20px; font-size: 1.05rem; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; }
+        button:hover { background: #c53030; }
+        .hidden { display: none; }
+        
+        .stage-title { font-size: 1.2rem; font-weight: bold; color: #2d3748; margin-bottom: 5px; text-align: center; }
+        .stage-desc { font-size: 0.85rem; color: #718096; margin-bottom: 15px; text-align: center; }
+        .progress-bar { text-align: center; font-size: 0.85rem; font-weight: bold; color: #e53e3e; margin-bottom: 10px; }
+
+        /* 予選カード（四角い枠） */
+        .yosen-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .yosen-card { border: 3px solid #cbd5e0; border-radius: 10px; padding: 10px; text-align: center; background: #f7fafc; cursor: pointer; transition: 0.2s; }
+        .yosen-card.selected { border-color: #e53e3e; background: #fff5f5; box-shadow: 0 2px 8px rgba(229,62,62,0.2); }
+        .yosen-card img { width: 100%; height: 140px; object-fit: cover; object-position: top center; border-radius: 6px; margin-bottom: 8px; background: #cbd5e0; border: 1px solid #e2e8f0; }
+        .yosen-card .name { font-size: 0.9rem; font-weight: bold; }
+
+        /* 本選カード（四角い枠） */
+        .honsen-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .honsen-card { border: 3px solid #cbd5e0; border-radius: 10px; padding: 12px; text-align: center; background: #f7fafc; cursor: pointer; transition: 0.2s; }
+        .honsen-card.rank1 { border-color: #3182ce; background: #ebf8ff; }
+        .honsen-card.rank2 { border-color: #38a169; background: #f0fff4; }
+        .honsen-card img { width: 100%; height: 140px; object-fit: cover; object-position: top center; border-radius: 6px; margin-bottom: 8px; background: #cbd5e0; border: 1px solid #e2e8f0; }
+        .honsen-card .name { font-size: 0.9rem; font-weight: bold; }
+        .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; color: white; display: inline-block; margin-top: 5px; }
+        .bg-1 { background: #3182ce; }
+        .bg-2 { background: #38a169; }
+
+        /* 決勝バトルカード（四角い枠） */
+        .battle-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
+        .battle-card { display: flex; flex-direction: column; align-items: center; background: #f7fafc; padding: 15px; border: 3px solid #cbd5e0; border-radius: 12px; cursor: pointer; transition: 0.2s; text-align: center; }
+        .battle-card:hover { background: #fff5f5; border-color: #e53e3e; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(229,62,62,0.15); }
+        .battle-card img { width: 100%; height: 200px; object-fit: cover; object-position: top center; border-radius: 8px; background: #cbd5e0; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+        .battle-card .name { font-size: 1.15rem; font-weight: bold; color: #1a202c; }
+
+        /* 結果発表（ベスト9） */
+        .grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .grid-item { background: #fff5f5; border: 2px dashed #e53e3e; padding: 8px 6px; text-align: center; border-radius: 8px; font-weight: bold; font-size: 0.8rem; }
+        .grid-item img { width: 100%; height: 95px; object-fit: cover; object-position: top center; border-radius: 4px; margin-bottom: 5px; display: block; background: #cbd5e0; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    <h1>⚾ 野球選手 好きな顔9選メーカー</h1>
+    <div class="subtitle">本選厳選・タイマン最適化版</div>
+
+    <!-- 1. 選手登録＆セーブ -->
+    <div id="screen-setup" class="card">
+        <div class="stage-title">選手を登録しよう</div>
+        <div class="stage-desc">
+            形式：<b>選手名, 画像URL</b> （1行に1人）<br>
+            ※一度登録すればブラウザにセーブされます。
+        </div>
+        <textarea id="player-input" placeholder="例：&#10;大谷翔平, https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Shohei_Ohtani_2023_%28cropped%29.jpg/800px-Shohei_Ohtani_2023_%28cropped%29.jpg&#10;選手B, https://example.com/photo2.jpg"></textarea>
+        <button onclick="saveAndStart()">セーブしてはじめる</button>
+    </div>
+
+    <!-- 2. ゲーム共通画面 -->
+    <div id="screen-game" class="card hidden">
+        <div class="progress-bar" id="progress-txt"></div>
+        <div class="stage-title" id="game-title"></div>
+        <div class="stage-desc" id="game-desc"></div>
+        <div id="game-content"></div>
+    </div>
+
+    <!-- 3. 結果発表 -->
+    <div id="screen-final" class="card hidden">
+        <div class="stage-title">👑 私の野球選手 好き顔ベスト9</div>
+        <div class="stage-desc">すべての比較を勝ち抜いた、あなただけのベスト9です！</div>
+        <div id="final-grid" class="grid-9"></div>
+        <button onclick="location.reload()" style="background:#718096; margin-top:20px;">最初からやり直す</button>
+    </div>
+
+    <script>
+        let allPlayers = [];
+        let yosenGroups = [];
+        let yosenIdx = 0;
+        let yosenSelectedMap = {};
+        
+        let honsenMatches = [];
+        let honsenIdx = 0;
+        let honsenScores = {};
+
+        let finalBattles = [];
+        let finalIdx = 0;
+        let finalScores = {};
+
+        window.onload = function() {
+            const saved = localStorage.getItem('baseball_sukigao_pro_v5');
+            if (saved) document.getElementById('player-input').value = saved;
+        };
+
+        function saveAndStart() {
+            const val = document.getElementById('player-input').value.trim();
+            if (!val) { alert('データを入力してください！'); return; }
+            localStorage.setItem('baseball_sukigao_pro_v5', val);
+            
+            allPlayers = [];
+            val.split('\n').forEach(line => {
+                let parts = line.split(',');
+                if (parts.length >= 2) {
+                    allPlayers.push({
+                        name: parts[0].trim(),
+                        img: parts.slice(1).join(',').trim(),
+                        id: Math.random().toString(36).substr(2, 9)
+                    });
+                }
+            });
+
+            if (allPlayers.length < 12) {
+                alert('本格的な比較を行うため、12人以上登録してください！（現在: ' + allPlayers.length + '人）');
+                return;
+            }
+
+            startYosen();
+        }
+
+        // ==========================================
+        // 1. 予選フェーズ
+        // ==========================================
+        function startYosen() {
+            document.getElementById('screen-setup').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            let shuffled = [...allPlayers].sort(() => Math.random() - 0.5);
+            yosenGroups = [];
+            
+            while(shuffled.length < 140 && allPlayers.length >= 4) {
+                shuffled = shuffled.concat([...allPlayers].sort(() => Math.random() - 0.5));
+            }
+
+            for(let i=0; i<shuffled.length; i+=4) {
+                let g = shuffled.slice(i, i+4);
+                if(g.length === 4) yosenGroups.push(g);
+                if(yosenGroups.length >= 35) break;
+            }
+
+            yosenIdx = 0;
+            yosenSelectedMap = {};
+            allPlayers.forEach(p => yosenSelectedMap[p.id] = { player: p, count: 0 });
+
+            showYosenGroup();
+        }
+
+        function showYosenGroup() {
+            if(yosenIdx >= yosenGroups.length) {
+                startHonsen();
+                return;
+            }
+
+            document.getElementById('game-title').innerText = "【 予選グループ投票 】";
+            document.getElementById('game-desc').innerText = "この4人の中から、好きな選手を【最大3人まで】選んでね！（0人でもOK）";
+            document.getElementById('progress-txt').innerText = `予選ラウンド: ${yosenIdx + 1} / ${yosenGroups.length}回`;
+
+            let currentGroup = yosenGroups[yosenIdx];
+            let html = '<div class="yosen-group">';
+            currentGroup.forEach((p, idx) => {
+                html += `
+                    <div class="yosen-card" id="y-card-${idx}" onclick="toggleYosenPick('${p.id}', ${idx})">
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/150x140?text=NoImage'">
+                        <div class="name">${p.name}</div>
+                        <div id="y-status-${idx}" style="font-size:0.8rem; color:#718096; margin-top:4px;">未選択</div>
+                    </div>
+                `;
+            });
+            html += '</div><button onclick="nextYosenGroup()">このグループの選択を確定 ➔</button>';
+            document.getElementById('game-content').innerHTML = html;
+
+            window.currentGroupPicks = {};
+        }
+
+        function toggleYosenPick(pid, idx) {
+            if(!window.currentGroupPicks) window.currentGroupPicks = {};
+            let card = document.getElementById(`y-card-${idx}`);
+            let status = document.getElementById(`y-status-${idx}`);
+
+            if(window.currentGroupPicks[pid]) {
+                delete window.currentGroupPicks[pid];
+                card.classList.remove('selected');
+                status.innerText = "未選択";
+            } else {
+                let currentCount = Object.keys(window.currentGroupPicks).length;
+                if(currentCount >= 3) {
+                    alert('選べるのは最大3人までです！');
+                    return;
+                }
+                window.currentGroupPicks[pid] = true;
+                card.classList.add('selected');
+                status.innerText = "✨ 選択中";
+            }
+        }
+
+        function nextYosenGroup() {
+            if(window.currentGroupPicks) {
+                Object.keys(window.currentGroupPicks).forEach(pid => {
+                    if(yosenSelectedMap[pid]) yosenSelectedMap[pid].count++;
+                });
+            }
+            yosenIdx++;
+            showYosenGroup();
+        }
+
+        // ==========================================
+        // 2. 本選フェーズ
+        // ==========================================
+        function startHonsen() {
+            let sortedYosen = Object.values(yosenSelectedMap).sort((a,b) => b.count - a.count);
+            let candidates = sortedYosen.filter(s => s.count > 0).map(s => s.player);
+            if(candidates.length < 12) {
+                candidates = sortedYosen.slice(0, 20).map(s => s.player);
+            }
+
+            honsenMatches = [];
+            for(let round = 0; round < 8; round++) {
+                let shuffled = [...candidates].sort(() => Math.random() - 0.5);
+                for(let i = 0; i < shuffled.length; i += 4) {
+                    let g = shuffled.slice(i, i + 4);
+                    if(g.length >= 3) {
+                        honsenMatches.push(g);
+                    }
+                }
+            }
+
+            honsenMatches.sort(() => Math.random() - 0.5);
+            if(honsenMatches.length > 35) {
+                honsenMatches = honsenMatches.slice(0, 35);
+            }
+
+            honsenIdx = 0;
+            honsenScores = {};
+            // 本選での「1位または2位を獲得した回数（あるいはスコア）」をトラッキングするため初期化
+            candidates.forEach(p => honsenScores[p.id] = { player: p, score: 0, pickedCount: 0 });
+
+            showHonsenMatch();
+        }
+
+        function showHonsenMatch() {
+            if(honsenIdx >= honsenMatches.length) {
+                startFinalBattles();
+                return;
+            }
+
+            document.getElementById('game-title').innerText = "【 本選：4人グループ比較戦 】";
+            document.getElementById('game-desc').innerText = "この4人の中から【 1位（一番好き）】と【 2位（次に好き）】を順番にタップして選んでね！";
+            document.getElementById('progress-txt').innerText = `本選グループ: ${honsenIdx + 1} / ${honsenMatches.length}`;
+
+            let group = honsenMatches[honsenIdx];
+            window.honsenSelection = { rank1: null, rank2: null };
+            window.currentHonsenGroup = group;
+
+            let html = '<div class="honsen-grid">';
+            group.forEach((p, idx) => {
+                html += `
+                    <div class="honsen-card" id="h-card-${idx}" onclick="selectHonsenRank('${p.id}', ${idx})">
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/150x140?text=NoImage'">
+                        <div class="name">${p.name}</div>
+                        <div id="h-badge-${idx}" style="margin-top:5px;"></div>
+                    </div>
+                `;
+            });
+            html += '</div><button id="honsen-next-btn" class="hidden" onclick="nextHonsenMatch()">次へ進む ➔</button>';
+            document.getElementById('game-content').innerHTML = html;
+        }
+
+        function selectHonsenRank(pid, idx) {
+            let card = document.getElementById(`h-card-${idx}`);
+            let badge = document.getElementById(`h-badge-${idx}`);
+
+            if(window.honsenSelection.rank1 === pid) {
+                window.honsenSelection.rank1 = null;
+                card.classList.remove('rank1');
+                badge.innerHTML = '';
+            } else if(window.honsenSelection.rank2 === pid) {
+                window.honsenSelection.rank2 = null;
+                card.classList.remove('rank2');
+                badge.innerHTML = '';
+            } else if(!window.honsenSelection.rank1) {
+                window.honsenSelection.rank1 = pid;
+                card.classList.add('rank1');
+                badge.innerHTML = '<span class="badge bg-1">1位</span>';
+            } else if(!window.honsenSelection.rank2) {
+                window.honsenSelection.rank2 = pid;
+                card.classList.add('rank2');
+                badge.innerHTML = '<span class="badge bg-2">2位</span>';
+            } else {
+                alert('1位と2位はすでに選択されています。解除したい場合はもう一度タップしてね！');
+                return;
+            }
+
+            if(window.honsenSelection.rank1 && window.honsenSelection.rank2) {
+                document.getElementById('honsen-next-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('honsen-next-btn').classList.add('hidden');
+            }
+        }
+
+        function nextHonsenMatch() {
+            let r1Id = window.honsenSelection.rank1;
+            let r2Id = window.honsenSelection.rank2;
+
+            if(r1Id && honsenScores[r1Id]) {
+                honsenScores[r1Id].score += 3;
+                honsenScores[r1Id].pickedCount++; // 1位・2位に選ばれた実績をプラス
+            }
+            if(r2Id && honsenScores[r2Id]) {
+                honsenScores[r2Id].score += 2;
+                honsenScores[r2Id].pickedCount++; // 1位・2位に選ばれた実績をプラス
+            }
+
+            honsenIdx++;
+            showHonsenMatch();
+        }
+
+        // ==========================================
+        // 3. 決勝フェーズ（本選で1回以上1位・2位に選ばれた人のみで総当たり）
+        // ==========================================
+        function startFinalBattles() {
+            // 【変更点】：本選の期間中、1回も1位・2位に選ばれなかった人（pickedCount === 0）をここで除外！
+            let qualified = Object.values(honsenScores).filter(item => item.pickedCount > 0);
+
+            // もし厳選しすぎて人数が少なくなってしまった場合の安全策（上位数人は最低残すなど）
+            if(qualified.length < 6) {
+                let rankedAll = Object.values(honsenScores).sort((a,b) => b.score - a.score);
+                qualified = rankedAll.slice(0, Math.min(9, rankedAll.length));
+            }
+
+            // スコア順にソートしつつ、最大16人に絞り込む
+            qualified.sort((a,b) => b.score - a.score);
+            let topPlayers = qualified.slice(0, 16).map(r => r.player);
+
+            // 残った精鋭たちだけで総当たり戦のペアを作成
+            finalBattles = [];
+            for(let i=0; i<topPlayers.length; i++) {
+                for(let j=i+1; j<topPlayers.length; j++) {
+                    finalBattles.push([topPlayers[i], topPlayers[j]]);
+                }
+            }
+            finalBattles.sort(() => Math.random() - 0.5);
+
+            finalIdx = 0;
+            finalScores = {};
+            topPlayers.forEach(p => finalScores[p.id] = { player: p, score: 0 });
+
+            showFinalBattle();
+        }
+
+        function showFinalBattle() {
+            if(finalIdx >= finalBattles.length) {
+                showFinalResult();
+                return;
+            }
+
+            document.getElementById('game-title').innerText = "【 最終ラウンド：2択総当たり戦 】";
+            document.getElementById('game-desc').innerText = "（本選を勝ち抜いた精鋭メンバーによるタイマン対決です！）より好みの顔を選んでね！";
+            document.getElementById('progress-txt').innerText = `決勝バトル: ${finalIdx + 1} / ${finalBattles.length}`;
+
+            let pair = finalBattles[finalIdx];
+            let html = '<div class="battle-container">';
+            pair.forEach(p => {
+                html += `
+                    <div class="battle-card" onclick='voteFinalWinner("${p.id}")'>
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300x200?text=NoImage'">
+                        <div class="name">✨ ${p.name}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('game-content').innerHTML = html;
+        }
+
+        function voteFinalWinner(winnerId) {
+            if(finalScores[winnerId]) {
+                finalScores[winnerId].score++;
+            }
+            finalIdx++;
+            showFinalBattle();
+        }
+
+        // ==========================================
+        // 4. 結果発表（ベスト9）
+        // ==========================================
+        function showFinalResult() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-final').classList.remove('hidden');
+
+            let ranked = Object.values(finalScores).sort((a,b) => b.score - a.score);
+            let finalNine = ranked.slice(0, 9).map(r => r.player);
+
+            while(finalNine.length < 9) {
+                finalNine.push({name: "枠", img: ""});
+            }
+
+            let html = '';
+            finalNine.forEach((p, idx) => {
+                html += `
+                    <div class="grid-item">
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100x95?text=NoImage'">
+                        ${idx + 1}位<br>${p.name}
+                    </div>
+                `;
+            });
+            document.getElementById('final-grid').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
